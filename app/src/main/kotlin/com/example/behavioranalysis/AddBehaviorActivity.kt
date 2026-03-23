@@ -40,7 +40,8 @@ class AddBehaviorActivity : AppCompatActivity() {
                 id = behaviorId,
                 subjectId = subjectId,
                 name = intent.getStringExtra("BEHAVIOR_NAME") ?: "",
-                operationalDefinition = intent.getStringExtra("BEHAVIOR_DEFINITION") ?: ""
+                operationalDefinition = intent.getStringExtra("BEHAVIOR_DEFINITION") ?: "",
+                createdAt = intent.getLongExtra("BEHAVIOR_CREATED_AT", System.currentTimeMillis())
             )
             binding.etBehaviorName.setText(editingBehavior!!.name)
             binding.etDefinition.setText(editingBehavior!!.operationalDefinition)

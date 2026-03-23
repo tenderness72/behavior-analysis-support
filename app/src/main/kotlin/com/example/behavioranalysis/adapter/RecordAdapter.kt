@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.behavioranalysis.IntervalNotesUtil
 import com.example.behavioranalysis.R
 import com.example.behavioranalysis.data.entity.BehaviorRecord
 import java.text.SimpleDateFormat
@@ -46,10 +47,7 @@ class RecordAdapter(
 
             if (record.notes != null) {
                 tvInterval.visibility = View.VISIBLE
-                val intervalCount = record.notes
-                    .substringAfter("インターバル: ")
-                    .substringBefore("回")
-                    .trim()
+                val intervalCount = IntervalNotesUtil.intervalCount(record.notes)
                 tvInterval.text = "インターバル記録 (${intervalCount}回)"
             } else {
                 tvInterval.visibility = View.GONE

@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
                     putExtra("SUBJECT_NAME", subject.name)
                     subject.age?.let { putExtra("SUBJECT_AGE", it) }
                     subject.notes?.let { putExtra("SUBJECT_NOTES", it) }
+                    putExtra("SUBJECT_CREATED_AT", subject.createdAt)
                 }
                 startActivity(intent)
             },

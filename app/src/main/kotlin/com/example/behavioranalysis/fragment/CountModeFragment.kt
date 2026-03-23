@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.behavioranalysis.IntervalNotesUtil
 import com.example.behavioranalysis.R
 import com.example.behavioranalysis.data.database.AppDatabase
 import com.example.behavioranalysis.data.entity.BehaviorRecord
@@ -221,7 +222,7 @@ class CountModeFragment : Fragment() {
             // 現在のインターバルの途中カウントも追加
             val allCounts = intervalCounts.toMutableList()
             if (countInCurrentInterval > 0) allCounts.add(countInCurrentInterval)
-            "インターバル: ${allCounts.size}回, 各回数: ${allCounts.joinToString(",")}"
+            IntervalNotesUtil.encode(allCounts)
         } else {
             null
         }

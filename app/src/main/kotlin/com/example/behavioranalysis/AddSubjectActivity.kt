@@ -37,7 +37,8 @@ class AddSubjectActivity : AppCompatActivity() {
                 id = subjectId,
                 name = intent.getStringExtra("SUBJECT_NAME") ?: "",
                 age = intent.getIntExtra("SUBJECT_AGE", -1).takeIf { it != -1 },
-                notes = intent.getStringExtra("SUBJECT_NOTES")
+                notes = intent.getStringExtra("SUBJECT_NOTES"),
+                createdAt = intent.getLongExtra("SUBJECT_CREATED_AT", System.currentTimeMillis())
             )
             binding.etName.setText(editingSubject!!.name)
             editingSubject!!.age?.let { binding.etAge.setText(it.toString()) }

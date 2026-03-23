@@ -6,7 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.behavioranalysis.IntervalNotesUtil
 import com.example.behavioranalysis.data.database.AppDatabase
 import com.example.behavioranalysis.data.entity.BehaviorRecord
 import com.example.behavioranalysis.databinding.FragmentGraphBinding
@@ -45,9 +48,11 @@ class GraphFragment : Fragment() {
 
         database = AppDatabase.getDatabase(requireContext())
 
-        lifecycleScope.launch {
-            database.behaviorRecordDao().getRecordsByBehavior(behaviorId).collect { records ->
-                updateUI(records)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                database.behaviorRecordDao().getRecordsByBehavior(behaviorId).collect { records ->
+                    updateUI(records)
+                }
             }
         }
     }
@@ -139,8 +144,9 @@ class GraphFragment : Fragment() {
         binding.barChart.visibility = View.VISIBLE
         binding.tvSectionInterval.visibility = View.VISIBLE
 
-        val countsString = latestIntervalRecord.notes?.substringAfter("各回数: ") ?: ""
-        val intervalCounts = countsString.split(",").mapNotNull { it.trim().toIntOrNull() }
+        val intervalCounts = latestIntervalRecord.notes
+            ?.let { IntervalNotesUtil.decode(it) }
+            ?: emptyList()
 
         if (intervalCounts.isEmpty()) {
             binding.barChart.visibility = View.GONE

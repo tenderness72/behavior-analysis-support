@@ -8,9 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.behavioranalysis.CsvExportUtil
+import com.example.behavioranalysis.IntervalNotesUtil
 import com.example.behavioranalysis.adapter.RecordAdapter
 import com.example.behavioranalysis.data.database.AppDatabase
 import com.example.behavioranalysis.data.entity.BehaviorRecord
@@ -65,11 +68,13 @@ class RecordListFragment : Fragment() {
             adapter = recordAdapter
         }
 
-        lifecycleScope.launch {
-            database.behaviorRecordDao().getRecordsByBehavior(behaviorId).collect { records ->
-                currentRecords = records
-                recordAdapter.updateRecords(records)
-                binding.tvEmpty.visibility = if (records.isEmpty()) View.VISIBLE else View.GONE
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                database.behaviorRecordDao().getRecordsByBehavior(behaviorId).collect { records ->
+                    currentRecords = records
+                    recordAdapter.updateRecords(records)
+                    binding.tvEmpty.visibility = if (records.isEmpty()) View.VISIBLE else View.GONE
+                }
             }
         }
 
@@ -131,9 +136,7 @@ class RecordListFragment : Fragment() {
             if (record.notes != null) {
                 appendLine()
                 appendLine("インターバル記録:")
-                val countsStr = record.notes.substringAfter("各回数: ")
-                val counts = countsStr.split(",").mapNotNull { it.trim().toIntOrNull() }
-                counts.forEachIndexed { index, count ->
+                IntervalNotesUtil.decode(record.notes).forEachIndexed { index, count ->
                     appendLine("  第${index + 1}インターバル: ${count}回")
                 }
             }

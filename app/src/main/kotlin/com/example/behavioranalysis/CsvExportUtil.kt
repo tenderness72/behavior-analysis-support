@@ -2,6 +2,7 @@ package com.example.behavioranalysis
 
 import android.content.ContentValues
 import android.content.Context
+import com.example.behavioranalysis.IntervalNotesUtil
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
@@ -37,9 +38,7 @@ object CsvExportUtil {
 
         val parsed = records.map { record ->
             if (record.notes != null) {
-                val countsStr = record.notes.substringAfter("各回数: ", missingDelimiterValue = "")
-                val counts = countsStr.split(",").mapNotNull { it.trim().toIntOrNull() }
-                ParsedRecord(record, "インターバル記録", counts)
+                ParsedRecord(record, "インターバル記録", IntervalNotesUtil.decode(record.notes))
             } else {
                 ParsedRecord(record, "連続記録", emptyList())
             }

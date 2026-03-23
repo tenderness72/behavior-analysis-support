@@ -56,6 +56,7 @@ class BehaviorListActivity : AppCompatActivity() {
                     putExtra("BEHAVIOR_ID", behavior.id)
                     putExtra("BEHAVIOR_NAME", behavior.name)
                     putExtra("BEHAVIOR_DEFINITION", behavior.operationalDefinition)
+                    putExtra("BEHAVIOR_CREATED_AT", behavior.createdAt)
                 }
                 startActivity(intent)
             },
