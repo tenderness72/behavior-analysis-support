@@ -1,0 +1,87 @@
+package com.example.behavioranalysis
+
+import android.os.Bundle
+import android.view.KeyEvent
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.example.behavioranalysis.databinding.ActivityBehaviorDetailBinding
+import com.example.behavioranalysis.fragment.CountModeFragment
+import com.example.behavioranalysis.fragment.GraphFragment
+import com.example.behavioranalysis.fragment.RecordListFragment
+import com.google.android.material.tabs.TabLayoutMediator
+
+class BehaviorDetailActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityBehaviorDetailBinding
+    private var countModeFragment: CountModeFragment? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityBehaviorDetfailBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        val behaviorId = intent.getLongExtra("BEHAVIOR_ID", -1)
+        val behaviorName = intent.getStringExtra("BEHAVIOR_NAME") ?: ""
+        val behaviorDefinition = intent.getStringExtra("BEHAVIOR_DEFINITION") ?: ""
+
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = behaviorName
+
+        val bundle = Bundle().apply {
+            putLong("BEHAVIOR_ID", behaviorId)
+            putString("BEHAVIOR_NAME", behaviorName)
+            putString("BEHAVIOR_DEFINITION", behaviorDefinition)
+        }
+
+        binding.viewPager.adapter = object : FragmentStateAdapter(this) {
+            override fun getItemCount() = 3
+
+            override fun createFragment(position: Int): Fragment {
+                return when (position) {
+                    0 -> CountModeFragment().apply {
+                        arguments = bundle
+                    }.also { countModeFragment = it }
+                    1 -> GraphFragment().apply { arguments = bundle }
+                    2 -> RecordListFragment().apply { arguments = bundle }
+                    else -> throw IllegalStateException("Invalid position: $position")
+                }
+            }
+        }
+
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> getString(R.string.tab_record)
+                1 -> getString(R.string.tab_graph)
+                2 -> getString(R.string.tab_history)
+                else -> ""
+            }
+        }.attach()
+
+        // ViewPager2 の底部インセット（ナビゲーションバー）を各Fragmentに伝播させる
+        ViewCompat.setOnApplyWindowInsetsListener(binding.viewPager) { view, insets ->
+            val navBar = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(0, 0, 0, navBar.bottom)
+            insets
+        }
+    }
+
+    // ボリュームキーをCountModeFragmentに委譲
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        val fragment = countModeFragment
+        if (fragment != null && fragment.isVisible) {
+            if (fragment.handleKeyDown(keyCode)) {
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressedDispatcher.onBackPressed()
+        return true
+    }
+}

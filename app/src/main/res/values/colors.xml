@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Teal palette -->
+    <color name="teal_900">#004D40</color>
+    <color name="teal_700">#00796B</color>
+    <color name="teal_500">#009688</color>
+    <color name="teal_400">#26A69A</color>
+    <color name="teal_200">#80CBC4</color>
+    <color name="teal_50">#E0F2F1</color>
+
+    <!-- Accent -->
+    <color name="accent_amber">#FFA000</color>
+
+    <!-- Neutral -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="background">#F5F5F5</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="on_surface">#212121</color>
+    <color name="on_surface_medium">#757575</color>
+    <color name="on_surface_light">#BDBDBD</color>
+    <color name="divider">#E0E0E0</color>
+
+    <!-- Status -->
+    <color name="counting_active">#00796B</color>
+    <color name="counting_active_dark">#004D40</color>
+    <color name="error">#D32F2F</color>
+
+    <!-- Legacy (compatibility) -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+</resources>

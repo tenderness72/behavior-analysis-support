@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  アプリアイコン フォアグラウンド
+  折れ線グラフ + 棒グラフのモチーフ（行動分析の記録・可視化を象徴）
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- グリッド線（薄い白） -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#33FFFFFF"
+        android:strokeWidth="1.2"
+        android:pathData="M28,72 L80,72" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#33FFFFFF"
+        android:strokeWidth="1.2"
+        android:pathData="M28,58 L80,58" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#33FFFFFF"
+        android:strokeWidth="1.2"
+        android:pathData="M28,44 L80,44" />
+
+    <!-- 棒グラフ（背景、薄い白） -->
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M32,60 L40,60 L40,72 L32,72 Z" />
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M44,50 L52,50 L52,72 L44,72 Z" />
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M56,55 L64,55 L64,72 L56,72 Z" />
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M68,42 L76,42 L76,72 L68,72 Z" />
+
+    <!-- 折れ線グラフ（白、メイン） -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M32,64 L44,52 L56,57 L68,40 L78,44" />
+
+    <!-- データポイント（塗りつぶし丸） -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,64 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M44,52 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M56,57 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M68,40 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M78,44 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+
+    <!-- 軸線 -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#CCFFFFFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M28,36 L28,74 L82,74" />
+
+</vector>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- バイブレーション権限 -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.BehaviorAnalysisApp"
+        tools:targetApi="31">
+
+        <!-- メイン画面（対象者一覧） -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.BehaviorAnalysisApp">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 対象者追加画面 -->
+        <activity
+            android:name=".AddSubjectActivity"
+            android:label="対象者を追加"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.BehaviorAnalysisApp" />
+
+        <!-- 行動一覧画面 -->
+        <activity
+            android:name=".BehaviorListActivity"
+            android:label="行動一覧"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.BehaviorAnalysisApp" />
+
+        <!-- 行動追加画面 -->
+        <activity
+            android:name=".AddBehaviorActivity"
+            android:label="行動を追加"
+            android:parentActivityName=".BehaviorListActivity"
+            android:theme="@style/Theme.BehaviorAnalysisApp" />
+
+        <!-- 行動詳細画面（タブ付き） -->
+        <activity
+            android:name=".BehaviorDetailActivity"
+            android:label="行動詳細"
+            android:parentActivityName=".BehaviorListActivity"
+            android:theme="@style/Theme.BehaviorAnalysisApp"
+            android:screenOrientation="portrait" />
+
+    </application>
+
+</manifest>

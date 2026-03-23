@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">Muninn</string>
+
+    <!-- 対象者関連 -->
+    <string name="subject_name_hint">名前（必須）</string>
+    <string name="subject_age_hint">年齢（任意）</string>
+    <string name="subject_notes_hint">メモ（任意）</string>
+
+    <!-- 行動関連 -->
+    <string name="behavior_name_hint">行動名（必須）</string>
+    <string name="behavior_definition_hint">操作的定義（必須）</string>
+    <string name="behavior_definition_example">例：「許可なく座席を離れ、5秒以上立ち歩く行動」</string>
+
+    <!-- 記録関連 -->
+    <string name="interval_continuous">連続記録（インターバルなし）</string>
+    <string name="interval_10sec">10秒</string>
+    <string name="interval_30sec">30秒</string>
+    <string name="interval_1min">1分</string>
+    <string name="interval_5min">5分</string>
+    <string name="interval_10min">10分</string>
+
+    <!-- タブ -->
+    <string name="tab_record">記録</string>
+    <string name="tab_graph">グラフ</string>
+    <string name="tab_history">履歴</string>
+
+    <!-- ボタン -->
+    <string name="button_save">保存</string>
+    <string name="button_cancel">キャンセル</string>
+    <string name="button_reset">リセット</string>
+
+    <!-- メッセージ -->
+    <string name="message_saved">保存しました</string>
+    <string name="message_name_required">名前を入力してください</string>
+    <string name="message_behavior_name_required">行動名を入力してください</string>
+    <string name="message_definition_required">操作的定義を入力してください</string>
+    <string name="message_no_data">記録データがありません</string>
+</resources>
