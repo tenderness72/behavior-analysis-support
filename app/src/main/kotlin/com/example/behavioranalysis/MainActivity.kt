@@ -1,5 +1,6 @@
 package com.example.behavioranalysis
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -31,13 +32,30 @@ class MainActivity : AppCompatActivity() {
 
         database = AppDatabase.getDatabase(this)
 
-        subjectAdapter = SubjectAdapter { subject ->
-            val intent = Intent(this, BehaviorListActivity::class.java).apply {
-                putExtra("SUBJECT_ID", subject.id)
-                putExtra("SUBJECT_NAME", subject.name)
+        subjectAdapter = SubjectAdapter(
+            onItemClick = { subject ->
+                val intent = Intent(this, BehaviorListActivity::class.java).apply {
+                    putExtra("SUBJECT_ID", subject.id)
+                    putExtra("SUBJECT_NAME", subject.name)
+                }
+                startActivity(intent)
+            },
+            onItemLongClick = { subject ->
+                showSubjectDeleteDialog(subject)
+            },
+            onEditClick = { subject ->
+                val intent = Intent(this, AddSubjectActivity::class.java).apply {
+                    putExtra("SUBJECT_ID", subject.id)
+                    putExtra("SUBJECT_NAME", subject.name)
+                    subject.age?.let { putExtra("SUBJECT_AGE", it) }
+                    subject.notes?.let { putExtra("SUBJECT_NOTES", it) }
+                }
+                startActivity(intent)
+            },
+            onDeleteClick = { subject ->
+                showSubjectDeleteDialog(subject)
             }
-            startActivity(intent)
-        }
+        )
 
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
@@ -74,5 +92,16 @@ class MainActivity : AppCompatActivity() {
                 subjectAdapter.updateSubjects(subjects)
             }
         }
+    }
+
+    private fun showSubjectDeleteDialog(subject: com.example.behavioranalysis.data.entity.Subject) {
+        AlertDialog.Builder(this)
+            .setTitle("対象者を削除")
+            .setMessage("「${subject.name}」を削除しますか？\n関連する行動・記録もすべて削除されます。")
+            .setPositiveButton("削除") { _, _ ->
+                lifecycleScope.launch { database.subjectDao().delete(subject) }
+            }
+            .setNegativeButton("キャンセル", null)
+            .show()
     }
 }

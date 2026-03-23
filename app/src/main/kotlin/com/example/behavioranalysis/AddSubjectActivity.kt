@@ -16,6 +16,9 @@ class AddSubjectActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddSubjectBinding
     private lateinit var database: AppDatabase
 
+    /** 編集モード時に既存エンティティを保持する（null = 新規作成） */
+    private var editingSubject: Subject? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddSubjectBinding.inflate(layoutInflater)
@@ -26,6 +29,23 @@ class AddSubjectActivity : AppCompatActivity() {
 
         database = AppDatabase.getDatabase(this)
 
+        // 編集モード: intent に SUBJECT_ID が渡されていれば既存データを復元
+        val subjectId = intent.getLongExtra("SUBJECT_ID", -1L)
+        if (subjectId != -1L) {
+            supportActionBar?.title = "対象者を編集"
+            editingSubject = Subject(
+                id = subjectId,
+                name = intent.getStringExtra("SUBJECT_NAME") ?: "",
+                age = intent.getIntExtra("SUBJECT_AGE", -1).takeIf { it != -1 },
+                notes = intent.getStringExtra("SUBJECT_NOTES")
+            )
+            binding.etName.setText(editingSubject!!.name)
+            editingSubject!!.age?.let { binding.etAge.setText(it.toString()) }
+            editingSubject!!.notes?.let { binding.etNotes.setText(it) }
+        } else {
+            supportActionBar?.title = "対象者を追加"
+        }
+
         // ナビゲーションバー下端との重なりを防ぐ
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
             val navBar = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -33,13 +53,8 @@ class AddSubjectActivity : AppCompatActivity() {
             insets
         }
 
-        binding.btnSave.setOnClickListener {
-            saveSubject()
-        }
-
-        binding.btnCancel.setOnClickListener {
-            finish()
-        }
+        binding.btnSave.setOnClickListener { saveSubject() }
+        binding.btnCancel.setOnClickListener { finish() }
     }
 
     private fun saveSubject() {
@@ -55,12 +70,22 @@ class AddSubjectActivity : AppCompatActivity() {
         val age = if (ageStr.isNotEmpty()) ageStr.toIntOrNull() else null
 
         lifecycleScope.launch {
-            val subject = Subject(
-                name = name,
-                age = age,
-                notes = notes.ifEmpty { null }
-            )
-            database.subjectDao().insert(subject)
+            val existing = editingSubject
+            if (existing != null) {
+                // 編集: createdAt を維持したまま更新
+                database.subjectDao().update(
+                    existing.copy(
+                        name = name,
+                        age = age,
+                        notes = notes.ifEmpty { null }
+                    )
+                )
+            } else {
+                // 新規作成
+                database.subjectDao().insert(
+                    Subject(name = name, age = age, notes = notes.ifEmpty { null })
+                )
+            }
             Toast.makeText(this@AddSubjectActivity, getString(R.string.message_saved), Toast.LENGTH_SHORT).show()
             finish()
         }

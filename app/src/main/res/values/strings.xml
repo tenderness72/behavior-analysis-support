@@ -28,6 +28,7 @@
     <string name="button_save">保存</string>
     <string name="button_cancel">キャンセル</string>
     <string name="button_reset">リセット</string>
+    <string name="button_export_csv">CSV出力</string>
 
     <!-- メッセージ -->
     <string name="message_saved">保存しました</string>

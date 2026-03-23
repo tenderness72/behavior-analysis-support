@@ -20,12 +20,13 @@ class BehaviorDetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityBehaviorDetfailBinding.inflate(layoutInflater)
+        binding = ActivityBehaviorDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val behaviorId = intent.getLongExtra("BEHAVIOR_ID", -1)
         val behaviorName = intent.getStringExtra("BEHAVIOR_NAME") ?: ""
         val behaviorDefinition = intent.getStringExtra("BEHAVIOR_DEFINITION") ?: ""
+        val subjectName = intent.getStringExtra("SUBJECT_NAME") ?: ""
 
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -35,6 +36,7 @@ class BehaviorDetailActivity : AppCompatActivity() {
             putLong("BEHAVIOR_ID", behaviorId)
             putString("BEHAVIOR_NAME", behaviorName)
             putString("BEHAVIOR_DEFINITION", behaviorDefinition)
+            putString("SUBJECT_NAME", subjectName)
         }
 
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
