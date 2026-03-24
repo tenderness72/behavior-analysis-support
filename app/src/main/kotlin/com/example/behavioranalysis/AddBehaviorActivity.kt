@@ -79,18 +79,21 @@ class AddBehaviorActivity : AppCompatActivity() {
     }
 
     private fun restoreRecordTypeUI(recordType: String, trialSettings: String?) {
-        if (recordType == "TRIAL") {
-            binding.rbTrial.isChecked = true
-            binding.layoutTrialOptions.visibility = View.VISIBLE
-            if (trialSettings != null && trialSettings.startsWith("FIXED:")) {
-                binding.rbTrialFixed.isChecked = true
-                binding.layoutFixedCount.visibility = View.VISIBLE
-                binding.etTrialCount.setText(trialSettings.removePrefix("FIXED:"))
-            } else {
-                binding.rbTrialFree.isChecked = true
+        when (recordType) {
+            "TRIAL" -> {
+                binding.rbTrial.isChecked = true
+                binding.layoutTrialOptions.visibility = View.VISIBLE
+                if (trialSettings != null && trialSettings.startsWith("FIXED:")) {
+                    binding.rbTrialFixed.isChecked = true
+                    binding.layoutFixedCount.visibility = View.VISIBLE
+                    binding.etTrialCount.setText(trialSettings.removePrefix("FIXED:"))
+                } else {
+                    binding.rbTrialFree.isChecked = true
+                }
             }
-        } else {
-            binding.rbEvent.isChecked = true
+            "DURATION" -> binding.rbDuration.isChecked = true
+            "LATENCY"  -> binding.rbLatency.isChecked = true
+            else       -> binding.rbEvent.isChecked = true
         }
     }
 
@@ -107,7 +110,12 @@ class AddBehaviorActivity : AppCompatActivity() {
             return
         }
 
-        val recordType = if (binding.rbTrial.isChecked) "TRIAL" else "EVENT"
+        val recordType = when {
+            binding.rbTrial.isChecked    -> "TRIAL"
+            binding.rbDuration.isChecked -> "DURATION"
+            binding.rbLatency.isChecked  -> "LATENCY"
+            else                         -> "EVENT"
+        }
         val trialSettings: String? = if (recordType == "TRIAL") {
             if (binding.rbTrialFixed.isChecked) {
                 val countStr = binding.etTrialCount.text?.toString()?.trim() ?: ""

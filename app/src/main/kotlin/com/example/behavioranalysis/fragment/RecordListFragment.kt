@@ -133,27 +133,54 @@ class RecordListFragment : Fragment() {
         val message = buildString {
             appendLine("日時: ${dateFormat.format(record.timestamp)}")
 
-            if (record.notes != null && com.example.behavioranalysis.TrialNotesUtil.isTrial(record.notes)) {
-                // 試行記録
-                val results = com.example.behavioranalysis.TrialNotesUtil.decode(record.notes)
-                val accuracy = com.example.behavioranalysis.TrialNotesUtil.accuracyRate(results)
-                appendLine("試行数: ${results.size}")
-                appendLine("正答率: %.1f%%".format(accuracy))
-                appendLine()
-                appendLine("試行結果:")
-                appendLine("  ＋（正反応）: ${com.example.behavioranalysis.TrialNotesUtil.correctCount(results)} 回")
-                appendLine("  ±（プロンプト）: ${com.example.behavioranalysis.TrialNotesUtil.promptedCount(results)} 回")
-                appendLine("  −（誤反応）: ${com.example.behavioranalysis.TrialNotesUtil.incorrectCount(results)} 回")
-                appendLine()
-                appendLine("系列: ${results.joinToString(" ")}")
-            } else {
-                // 事象記録
-                appendLine("合計回数: ${record.count}回")
-                if (record.notes != null) {
+            when {
+                record.notes != null && com.example.behavioranalysis.TrialNotesUtil.isTrial(record.notes) -> {
+                    // 試行記録
+                    val results = com.example.behavioranalysis.TrialNotesUtil.decode(record.notes)
+                    val accuracy = com.example.behavioranalysis.TrialNotesUtil.accuracyRate(results)
+                    appendLine("試行数: ${results.size}")
+                    appendLine("正答率: %.1f%%".format(accuracy))
                     appendLine()
-                    appendLine("インターバル記録:")
-                    IntervalNotesUtil.decode(record.notes).forEachIndexed { index, count ->
-                        appendLine("  第${index + 1}インターバル: ${count}回")
+                    appendLine("  ＋（正反応）: ${com.example.behavioranalysis.TrialNotesUtil.correctCount(results)} 回")
+                    appendLine("  ±（プロンプト）: ${com.example.behavioranalysis.TrialNotesUtil.promptedCount(results)} 回")
+                    appendLine("  −（誤反応）: ${com.example.behavioranalysis.TrialNotesUtil.incorrectCount(results)} 回")
+                    appendLine()
+                    appendLine("系列: ${results.joinToString(" ")}")
+                }
+                record.notes != null && com.example.behavioranalysis.TimingNotesUtil.isDuration(record.notes) -> {
+                    // 持続時間記録
+                    val entries = com.example.behavioranalysis.TimingNotesUtil.decode(record.notes)
+                    appendLine("発生回数: ${entries.size} 回")
+                    appendLine("合計: ${com.example.behavioranalysis.TimingNotesUtil.formatSeconds(com.example.behavioranalysis.TimingNotesUtil.totalSeconds(entries))}")
+                    appendLine("平均: ${com.example.behavioranalysis.TimingNotesUtil.formatSeconds(com.example.behavioranalysis.TimingNotesUtil.averageSeconds(entries))}")
+                    appendLine()
+                    entries.forEachIndexed { i, e ->
+                        appendLine("  第${i + 1}回: ${com.example.behavioranalysis.TimingNotesUtil.formatTimestamp(e.startMs)} 〜 " +
+                                "${com.example.behavioranalysis.TimingNotesUtil.formatTimestamp(e.endMs)}  " +
+                                "[${com.example.behavioranalysis.TimingNotesUtil.formatSeconds(e.durationSeconds)}]")
+                    }
+                }
+                record.notes != null && com.example.behavioranalysis.TimingNotesUtil.isLatency(record.notes) -> {
+                    // 潜時記録
+                    val entries = com.example.behavioranalysis.TimingNotesUtil.decode(record.notes)
+                    appendLine("試行数: ${entries.size} 回")
+                    appendLine("平均潜時: ${com.example.behavioranalysis.TimingNotesUtil.formatSeconds(com.example.behavioranalysis.TimingNotesUtil.averageSeconds(entries))}")
+                    appendLine()
+                    entries.forEachIndexed { i, e ->
+                        appendLine("  第${i + 1}試行: 刺激 ${com.example.behavioranalysis.TimingNotesUtil.formatTimestamp(e.startMs)} → " +
+                                "反応 ${com.example.behavioranalysis.TimingNotesUtil.formatTimestamp(e.endMs)}  " +
+                                "[${com.example.behavioranalysis.TimingNotesUtil.formatSeconds(e.durationSeconds)}]")
+                    }
+                }
+                else -> {
+                    // 事象記録
+                    appendLine("合計回数: ${record.count}回")
+                    if (record.notes != null) {
+                        appendLine()
+                        appendLine("インターバル記録:")
+                        IntervalNotesUtil.decode(record.notes).forEachIndexed { index, count ->
+                            appendLine("  第${index + 1}インターバル: ${count}回")
+                        }
                     }
                 }
             }

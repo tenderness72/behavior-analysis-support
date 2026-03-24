@@ -10,6 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.behavioranalysis.IntervalNotesUtil
+import com.example.behavioranalysis.TimingNotesUtil
 import com.example.behavioranalysis.TrialNotesUtil
 import com.example.behavioranalysis.data.database.AppDatabase
 import com.example.behavioranalysis.data.entity.BehaviorRecord
@@ -73,10 +74,11 @@ class GraphFragment : Fragment() {
 
         binding.tvNoData.visibility = View.GONE
 
-        if (recordType == "TRIAL") {
-            updateTrialUI(records)
-        } else {
-            updateEventUI(records)
+        when (recordType) {
+            "TRIAL"    -> updateTrialUI(records)
+            "DURATION" -> updateTimingUI(records, isDuration = true)
+            "LATENCY"  -> updateTimingUI(records, isDuration = false)
+            else       -> updateEventUI(records)
         }
     }
 
@@ -136,6 +138,75 @@ class GraphFragment : Fragment() {
             axisLeft.apply {
                 axisMinimum = 0f
                 axisMaximum = 100f
+                setDrawGridLines(true)
+            }
+            axisRight.isEnabled = false
+            description.isEnabled = false
+            legend.isEnabled = true
+            animateX(800)
+            invalidate()
+        }
+    }
+
+    // ---- 持続時間 / 潜時: セッション別平均グラフ ----
+
+    private fun updateTimingUI(records: List<BehaviorRecord>, isDuration: Boolean) {
+        val filtered = records.filter {
+            if (isDuration) TimingNotesUtil.isDuration(it.notes)
+            else TimingNotesUtil.isLatency(it.notes)
+        }
+
+        if (filtered.isEmpty()) {
+            binding.tvNoData.visibility = View.VISIBLE
+            binding.lineChart.visibility = View.GONE
+            binding.barChart.visibility = View.GONE
+            binding.tvSectionDaily.visibility = View.GONE
+            binding.tvSectionInterval.visibility = View.GONE
+            binding.tvSummary.text = "行動名: $behaviorName\n記録: 0 セッション"
+            return
+        }
+
+        val label = if (isDuration) "平均持続時間 (秒)" else "平均潜時 (秒)"
+        val sectionLabel = if (isDuration) "セッション別平均持続時間" else "セッション別平均潜時"
+
+        val dateFormat = SimpleDateFormat("MM/dd", Locale.getDefault())
+        val labels = filtered.mapIndexed { i, r -> "S${i + 1}(${dateFormat.format(r.timestamp)})" }
+        val entries = filtered.mapIndexed { index, record ->
+            val avg = TimingNotesUtil.averageSeconds(TimingNotesUtil.decode(record.notes!!))
+            Entry(index.toFloat(), avg.toFloat())
+        }
+
+        val overallAvg = entries.map { it.y }.average()
+        val latestAvg = entries.lastOrNull()?.y ?: 0f
+        binding.tvSummary.text = "行動名: $behaviorName\nセッション数: ${filtered.size}  " +
+                "最新平均: ${"%.2f".format(latestAvg)}秒  全体平均: ${"%.2f".format(overallAvg)}秒"
+
+        binding.lineChart.visibility = View.VISIBLE
+        binding.tvSectionDaily.visibility = View.VISIBLE
+        binding.tvSectionDaily.text = sectionLabel
+        binding.barChart.visibility = View.GONE
+        binding.tvSectionInterval.visibility = View.GONE
+
+        val color = if (isDuration) Color.rgb(21, 101, 192) else Color.rgb(130, 0, 130)
+        val dataSet = LineDataSet(entries, label).apply {
+            this.color = color
+            lineWidth = 2f
+            circleRadius = 5f
+            setCircleColor(color)
+            valueTextSize = 10f
+            setDrawValues(true)
+        }
+
+        binding.lineChart.apply {
+            data = LineData(dataSet)
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                valueFormatter = IndexAxisValueFormatter(labels)
+                granularity = 1f
+                setDrawGridLines(false)
+            }
+            axisLeft.apply {
+                axisMinimum = 0f
                 setDrawGridLines(true)
             }
             axisRight.isEnabled = false

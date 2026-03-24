@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.behavioranalysis.databinding.ActivityBehaviorDetailBinding
 import com.example.behavioranalysis.fragment.CountModeFragment
+import com.example.behavioranalysis.fragment.DurationModeFragment
 import com.example.behavioranalysis.fragment.GraphFragment
+import com.example.behavioranalysis.fragment.LatencyModeFragment
 import com.example.behavioranalysis.fragment.RecordListFragment
 import com.example.behavioranalysis.fragment.TrialModeFragment
 import com.google.android.material.tabs.TabLayoutMediator
@@ -50,10 +52,11 @@ class BehaviorDetailActivity : AppCompatActivity() {
 
             override fun createFragment(position: Int): Fragment {
                 return when (position) {
-                    0 -> if (recordType == "TRIAL") {
-                        TrialModeFragment().apply { arguments = bundle }
-                    } else {
-                        CountModeFragment().apply {
+                    0 -> when (recordType) {
+                        "TRIAL"    -> TrialModeFragment().apply { arguments = bundle }
+                        "DURATION" -> DurationModeFragment().apply { arguments = bundle }
+                        "LATENCY"  -> LatencyModeFragment().apply { arguments = bundle }
+                        else       -> CountModeFragment().apply {
                             arguments = bundle
                         }.also { countModeFragment = it }
                     }
