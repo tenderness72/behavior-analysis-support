@@ -2,6 +2,7 @@ package com.example.behavioranalysis
 
 import android.os.Bundle
 import android.view.KeyEvent
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -83,6 +84,11 @@ class BehaviorDetailActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
+        val fragment = countModeFragment
+        if (fragment != null && fragment.isVisible && fragment.isActive) {
+            Toast.makeText(this, "カウント中は画面を移動できません", Toast.LENGTH_SHORT).show()
+            return false
+        }
         onBackPressedDispatcher.onBackPressed()
         return true
     }

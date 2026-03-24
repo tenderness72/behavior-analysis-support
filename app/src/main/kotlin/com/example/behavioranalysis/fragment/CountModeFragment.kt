@@ -6,6 +6,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -32,6 +33,9 @@ class CountModeFragment : Fragment() {
     // カウント関連
     private var currentCount: Int = 0
     private var isCountingMode: Boolean = false
+
+    // ロック中かどうか（Activity から参照）
+    val isActive: Boolean get() = isCountingMode
 
     // インターバル関連
     private var selectedIntervalSeconds: Int = 0  // 0 = 連続記録
@@ -141,6 +145,10 @@ class CountModeFragment : Fragment() {
 
         binding.spinnerInterval.isEnabled = false
 
+        // 画面を常時点灯 & ロック
+        requireActivity().window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        requireActivity().startLockTask()
+
         if (selectedIntervalSeconds > 0) {
             startIntervalTimer()
         }
@@ -153,6 +161,11 @@ class CountModeFragment : Fragment() {
         countDownTimer?.cancel()
         countDownTimer = null
         binding.spinnerInterval.isEnabled = true
+
+        // 画面点灯フラグ解除 & ロック解除
+        requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        try { requireActivity().stopLockTask() } catch (_: Exception) {}
+
         updateUI()
     }
 
