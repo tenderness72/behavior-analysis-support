@@ -1,6 +1,7 @@
 package com.example.behavioranalysis
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -36,20 +37,26 @@ class AddBehaviorActivity : AppCompatActivity() {
         val behaviorId = intent.getLongExtra("BEHAVIOR_ID", -1L)
         if (behaviorId != -1L) {
             supportActionBar?.title = "行動を編集"
+            val recordType = intent.getStringExtra("BEHAVIOR_RECORD_TYPE") ?: "EVENT"
+            val trialSettings = intent.getStringExtra("BEHAVIOR_TRIAL_SETTINGS")
             editingBehavior = Behavior(
                 id = behaviorId,
                 subjectId = subjectId,
                 name = intent.getStringExtra("BEHAVIOR_NAME") ?: "",
                 operationalDefinition = intent.getStringExtra("BEHAVIOR_DEFINITION") ?: "",
-                createdAt = intent.getLongExtra("BEHAVIOR_CREATED_AT", System.currentTimeMillis())
+                createdAt = intent.getLongExtra("BEHAVIOR_CREATED_AT", System.currentTimeMillis()),
+                recordType = recordType,
+                trialSettings = trialSettings
             )
             binding.etBehaviorName.setText(editingBehavior!!.name)
             binding.etDefinition.setText(editingBehavior!!.operationalDefinition)
+            restoreRecordTypeUI(recordType, trialSettings)
         } else {
             supportActionBar?.title = "行動を追加"
         }
 
-        // ナビゲーションバー下端との重なりを防ぐ
+        setupRecordTypeUI()
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
             val navBar = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.setPadding(0, 0, 0, navBar.bottom)
@@ -58,6 +65,33 @@ class AddBehaviorActivity : AppCompatActivity() {
 
         binding.btnSave.setOnClickListener { saveBehavior() }
         binding.btnCancel.setOnClickListener { finish() }
+    }
+
+    private fun setupRecordTypeUI() {
+        binding.rgRecordType.setOnCheckedChangeListener { _, checkedId ->
+            binding.layoutTrialOptions.visibility =
+                if (checkedId == R.id.rb_trial) View.VISIBLE else View.GONE
+        }
+        binding.rgTrialMode.setOnCheckedChangeListener { _, checkedId ->
+            binding.layoutFixedCount.visibility =
+                if (checkedId == R.id.rb_trial_fixed) View.VISIBLE else View.GONE
+        }
+    }
+
+    private fun restoreRecordTypeUI(recordType: String, trialSettings: String?) {
+        if (recordType == "TRIAL") {
+            binding.rbTrial.isChecked = true
+            binding.layoutTrialOptions.visibility = View.VISIBLE
+            if (trialSettings != null && trialSettings.startsWith("FIXED:")) {
+                binding.rbTrialFixed.isChecked = true
+                binding.layoutFixedCount.visibility = View.VISIBLE
+                binding.etTrialCount.setText(trialSettings.removePrefix("FIXED:"))
+            } else {
+                binding.rbTrialFree.isChecked = true
+            }
+        } else {
+            binding.rbEvent.isChecked = true
+        }
     }
 
     private fun saveBehavior() {
@@ -73,17 +107,41 @@ class AddBehaviorActivity : AppCompatActivity() {
             return
         }
 
+        val recordType = if (binding.rbTrial.isChecked) "TRIAL" else "EVENT"
+        val trialSettings: String? = if (recordType == "TRIAL") {
+            if (binding.rbTrialFixed.isChecked) {
+                val countStr = binding.etTrialCount.text?.toString()?.trim() ?: ""
+                val count = countStr.toIntOrNull()
+                if (count == null || count <= 0) {
+                    Toast.makeText(this, "試行数を正しく入力してください", Toast.LENGTH_SHORT).show()
+                    return
+                }
+                "FIXED:$count"
+            } else {
+                "FREE"
+            }
+        } else null
+
         lifecycleScope.launch {
             val existing = editingBehavior
             if (existing != null) {
-                // 編集: createdAt を維持したまま更新
                 database.behaviorDao().update(
-                    existing.copy(name = name, operationalDefinition = definition)
+                    existing.copy(
+                        name = name,
+                        operationalDefinition = definition,
+                        recordType = recordType,
+                        trialSettings = trialSettings
+                    )
                 )
             } else {
-                // 新規作成
                 database.behaviorDao().insert(
-                    Behavior(subjectId = subjectId, name = name, operationalDefinition = definition)
+                    Behavior(
+                        subjectId = subjectId,
+                        name = name,
+                        operationalDefinition = definition,
+                        recordType = recordType,
+                        trialSettings = trialSettings
+                    )
                 )
             }
             Toast.makeText(this@AddBehaviorActivity, getString(R.string.message_saved), Toast.LENGTH_SHORT).show()

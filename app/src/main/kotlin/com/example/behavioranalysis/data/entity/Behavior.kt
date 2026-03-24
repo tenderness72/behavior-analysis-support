@@ -28,5 +28,11 @@ data class Behavior(
     val subjectId: Long,                    // 外部キー: 対象者ID
     val name: String,                       // 必須: 行動名（例: 「離席」）
     val operationalDefinition: String,      // 必須: 操作的定義
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+
+    // 記録法: "EVENT"（事象記録法）/ "TRIAL"（試行記録）
+    val recordType: String = "EVENT",
+
+    // 試行設定（TRIAL のみ使用）: "FREE"（自由終了）/ "FIXED:N"（N試行固定）
+    val trialSettings: String? = null
 )

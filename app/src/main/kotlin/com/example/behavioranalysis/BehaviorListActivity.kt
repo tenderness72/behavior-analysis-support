@@ -44,6 +44,8 @@ class BehaviorListActivity : AppCompatActivity() {
                     putExtra("BEHAVIOR_NAME", behavior.name)
                     putExtra("BEHAVIOR_DEFINITION", behavior.operationalDefinition)
                     putExtra("SUBJECT_NAME", subjectName)
+                    putExtra("BEHAVIOR_RECORD_TYPE", behavior.recordType)
+                    putExtra("BEHAVIOR_TRIAL_SETTINGS", behavior.trialSettings)
                 }
                 startActivity(intent)
             },
@@ -57,6 +59,8 @@ class BehaviorListActivity : AppCompatActivity() {
                     putExtra("BEHAVIOR_NAME", behavior.name)
                     putExtra("BEHAVIOR_DEFINITION", behavior.operationalDefinition)
                     putExtra("BEHAVIOR_CREATED_AT", behavior.createdAt)
+                    putExtra("BEHAVIOR_RECORD_TYPE", behavior.recordType)
+                    putExtra("BEHAVIOR_TRIAL_SETTINGS", behavior.trialSettings)
                 }
                 startActivity(intent)
             },

@@ -12,6 +12,7 @@ import com.example.behavioranalysis.databinding.ActivityBehaviorDetailBinding
 import com.example.behavioranalysis.fragment.CountModeFragment
 import com.example.behavioranalysis.fragment.GraphFragment
 import com.example.behavioranalysis.fragment.RecordListFragment
+import com.example.behavioranalysis.fragment.TrialModeFragment
 import com.google.android.material.tabs.TabLayoutMediator
 
 class BehaviorDetailActivity : AppCompatActivity() {
@@ -28,6 +29,8 @@ class BehaviorDetailActivity : AppCompatActivity() {
         val behaviorName = intent.getStringExtra("BEHAVIOR_NAME") ?: ""
         val behaviorDefinition = intent.getStringExtra("BEHAVIOR_DEFINITION") ?: ""
         val subjectName = intent.getStringExtra("SUBJECT_NAME") ?: ""
+        val recordType = intent.getStringExtra("BEHAVIOR_RECORD_TYPE") ?: "EVENT"
+        val trialSettings = intent.getStringExtra("BEHAVIOR_TRIAL_SETTINGS") ?: "FREE"
 
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -38,6 +41,8 @@ class BehaviorDetailActivity : AppCompatActivity() {
             putString("BEHAVIOR_NAME", behaviorName)
             putString("BEHAVIOR_DEFINITION", behaviorDefinition)
             putString("SUBJECT_NAME", subjectName)
+            putString("RECORD_TYPE", recordType)
+            putString("TRIAL_SETTINGS", trialSettings)
         }
 
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
@@ -45,9 +50,13 @@ class BehaviorDetailActivity : AppCompatActivity() {
 
             override fun createFragment(position: Int): Fragment {
                 return when (position) {
-                    0 -> CountModeFragment().apply {
-                        arguments = bundle
-                    }.also { countModeFragment = it }
+                    0 -> if (recordType == "TRIAL") {
+                        TrialModeFragment().apply { arguments = bundle }
+                    } else {
+                        CountModeFragment().apply {
+                            arguments = bundle
+                        }.also { countModeFragment = it }
+                    }
                     1 -> GraphFragment().apply { arguments = bundle }
                     2 -> RecordListFragment().apply { arguments = bundle }
                     else -> throw IllegalStateException("Invalid position: $position")
@@ -64,7 +73,6 @@ class BehaviorDetailActivity : AppCompatActivity() {
             }
         }.attach()
 
-        // ViewPager2 の底部インセット（ナビゲーションバー）を各Fragmentに伝播させる
         ViewCompat.setOnApplyWindowInsetsListener(binding.viewPager) { view, insets ->
             val navBar = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.setPadding(0, 0, 0, navBar.bottom)
@@ -72,7 +80,7 @@ class BehaviorDetailActivity : AppCompatActivity() {
         }
     }
 
-    // ボリュームキーをCountModeFragmentに委譲
+    // ボリュームキーをCountModeFragmentに委譲（事象記録法のみ）
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         val fragment = countModeFragment
         if (fragment != null && fragment.isVisible) {

@@ -132,12 +132,29 @@ class RecordListFragment : Fragment() {
         val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault())
         val message = buildString {
             appendLine("日時: ${dateFormat.format(record.timestamp)}")
-            appendLine("合計回数: ${record.count}回")
-            if (record.notes != null) {
+
+            if (record.notes != null && com.example.behavioranalysis.TrialNotesUtil.isTrial(record.notes)) {
+                // 試行記録
+                val results = com.example.behavioranalysis.TrialNotesUtil.decode(record.notes)
+                val accuracy = com.example.behavioranalysis.TrialNotesUtil.accuracyRate(results)
+                appendLine("試行数: ${results.size}")
+                appendLine("正答率: %.1f%%".format(accuracy))
                 appendLine()
-                appendLine("インターバル記録:")
-                IntervalNotesUtil.decode(record.notes).forEachIndexed { index, count ->
-                    appendLine("  第${index + 1}インターバル: ${count}回")
+                appendLine("試行結果:")
+                appendLine("  ＋（正反応）: ${com.example.behavioranalysis.TrialNotesUtil.correctCount(results)} 回")
+                appendLine("  ±（プロンプト）: ${com.example.behavioranalysis.TrialNotesUtil.promptedCount(results)} 回")
+                appendLine("  −（誤反応）: ${com.example.behavioranalysis.TrialNotesUtil.incorrectCount(results)} 回")
+                appendLine()
+                appendLine("系列: ${results.joinToString(" ")}")
+            } else {
+                // 事象記録
+                appendLine("合計回数: ${record.count}回")
+                if (record.notes != null) {
+                    appendLine()
+                    appendLine("インターバル記録:")
+                    IntervalNotesUtil.decode(record.notes).forEachIndexed { index, count ->
+                        appendLine("  第${index + 1}インターバル: ${count}回")
+                    }
                 }
             }
         }

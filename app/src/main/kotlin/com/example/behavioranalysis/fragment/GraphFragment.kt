@@ -10,6 +10,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.behavioranalysis.IntervalNotesUtil
+import com.example.behavioranalysis.TrialNotesUtil
 import com.example.behavioranalysis.data.database.AppDatabase
 import com.example.behavioranalysis.data.entity.BehaviorRecord
 import com.example.behavioranalysis.databinding.FragmentGraphBinding
@@ -28,11 +29,13 @@ class GraphFragment : Fragment() {
     private lateinit var database: AppDatabase
     private var behaviorId: Long = -1
     private var behaviorName: String = ""
+    private var recordType: String = "EVENT"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         behaviorId = arguments?.getLong("BEHAVIOR_ID", -1) ?: -1
         behaviorName = arguments?.getString("BEHAVIOR_NAME") ?: ""
+        recordType = arguments?.getString("RECORD_TYPE") ?: "EVENT"
     }
 
     override fun onCreateView(
@@ -64,13 +67,91 @@ class GraphFragment : Fragment() {
             binding.barChart.visibility = View.GONE
             binding.tvSectionDaily.visibility = View.GONE
             binding.tvSectionInterval.visibility = View.GONE
-            binding.tvSummary.text = "行動名: $behaviorName\n合計: 0 回（0 記録）"
+            binding.tvSummary.text = "行動名: $behaviorName\n合計: 0 記録"
             return
         }
 
         binding.tvNoData.visibility = View.GONE
+
+        if (recordType == "TRIAL") {
+            updateTrialUI(records)
+        } else {
+            updateEventUI(records)
+        }
+    }
+
+    // ---- 試行記録: 正答率グラフ ----
+
+    private fun updateTrialUI(records: List<BehaviorRecord>) {
+        val trialRecords = records.filter { TrialNotesUtil.isTrial(it.notes) }
+
+        if (trialRecords.isEmpty()) {
+            binding.tvNoData.visibility = View.VISIBLE
+            binding.lineChart.visibility = View.GONE
+            binding.barChart.visibility = View.GONE
+            binding.tvSectionDaily.visibility = View.GONE
+            binding.tvSectionInterval.visibility = View.GONE
+            binding.tvSummary.text = "行動名: $behaviorName\n試行記録: 0 セッション"
+            return
+        }
+
+        val latestRate = TrialNotesUtil.accuracyRateFromNotes(trialRecords.last().notes!!)
+        val maxRate = trialRecords.maxOf { TrialNotesUtil.accuracyRateFromNotes(it.notes!!) }
+
+        binding.tvSummary.text = "行動名: $behaviorName\n" +
+                "セッション数: ${trialRecords.size}  " +
+                "最新正答率: %.1f%%  最高: %.1f%%".format(latestRate, maxRate)
+
         binding.lineChart.visibility = View.VISIBLE
         binding.tvSectionDaily.visibility = View.VISIBLE
+        binding.tvSectionDaily.text = "セッション別正答率"
+        binding.barChart.visibility = View.GONE
+        binding.tvSectionInterval.visibility = View.GONE
+
+        val dateFormat = SimpleDateFormat("MM/dd", Locale.getDefault())
+        val labels = trialRecords.mapIndexed { i, r ->
+            "S${i + 1}(${dateFormat.format(r.timestamp)})"
+        }
+        val entries = trialRecords.mapIndexed { index, record ->
+            Entry(index.toFloat(), TrialNotesUtil.accuracyRateFromNotes(record.notes!!).toFloat())
+        }
+
+        val dataSet = LineDataSet(entries, "正答率 (%)").apply {
+            color = Color.rgb(46, 125, 50)
+            lineWidth = 2f
+            circleRadius = 5f
+            setCircleColor(Color.rgb(46, 125, 50))
+            valueTextSize = 10f
+            setDrawValues(true)
+        }
+
+        binding.lineChart.apply {
+            data = LineData(dataSet)
+            xAxis.apply {
+                position = XAxis.XAxisPosition.BOTTOM
+                valueFormatter = IndexAxisValueFormatter(labels)
+                granularity = 1f
+                setDrawGridLines(false)
+            }
+            axisLeft.apply {
+                axisMinimum = 0f
+                axisMaximum = 100f
+                setDrawGridLines(true)
+            }
+            axisRight.isEnabled = false
+            description.isEnabled = false
+            legend.isEnabled = true
+            animateX(800)
+            invalidate()
+        }
+    }
+
+    // ---- 事象記録: 従来の頻度グラフ ----
+
+    private fun updateEventUI(records: List<BehaviorRecord>) {
+        binding.lineChart.visibility = View.VISIBLE
+        binding.tvSectionDaily.visibility = View.VISIBLE
+        binding.tvSectionDaily.text = "日ごとの発生回数"
 
         val totalCount = records.sumOf { it.count }
         binding.tvSummary.text = "行動名: $behaviorName\n合計: $totalCount 回（${records.size} 記録）"
@@ -82,7 +163,6 @@ class GraphFragment : Fragment() {
     private fun setupLineChart(records: List<BehaviorRecord>) {
         val dateFormat = SimpleDateFormat("MM/dd", Locale.getDefault())
 
-        // 日付ごとにグループ化して合計
         val dailyData = records
             .groupBy {
                 val calendar = Calendar.getInstance()
@@ -130,9 +210,8 @@ class GraphFragment : Fragment() {
     }
 
     private fun setupBarChart(records: List<BehaviorRecord>) {
-        // 最新のインターバル記録を取得
         val latestIntervalRecord = records
-            .filter { it.notes != null }
+            .filter { it.notes != null && !TrialNotesUtil.isTrial(it.notes) }
             .maxByOrNull { it.timestamp }
 
         if (latestIntervalRecord == null) {
