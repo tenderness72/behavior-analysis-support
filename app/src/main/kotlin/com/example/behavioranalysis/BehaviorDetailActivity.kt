@@ -3,6 +3,7 @@ package com.example.behavioranalysis
 import android.os.Bundle
 import android.view.KeyEvent
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -81,6 +82,23 @@ class BehaviorDetailActivity : AppCompatActivity() {
             view.setPadding(0, 0, 0, navBar.bottom)
             insets
         }
+
+        // システムの戻るボタン・ジェスチャーをカウント中はブロック
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val fragment = countModeFragment
+                if (fragment != null && fragment.isActive) {
+                    Toast.makeText(
+                        this@BehaviorDetailActivity,
+                        "カウント中は画面を移動できません",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
     // ボリュームキーをCountModeFragmentに委譲（事象記録法のみ）
