@@ -9,7 +9,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.behavioranalysis"
+        applicationId = "behavior.analysis.app"
         minSdk = 29
         targetSdk = 35
         versionCode = 1
@@ -20,7 +20,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true        // R8 有効（コード圧縮・難読化）
+            isShrinkResources = true      // 未使用リソースも削除
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
